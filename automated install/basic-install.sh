@@ -315,11 +315,15 @@ It is also possible to use a DHCP reservation, but if you are going to do that, 
 }
 
 setDHCPCD() {
-	# Append these lines to dhcpcd.conf to enable a static IP
-	echo "::: interface $piholeInterface
-	static ip_address=$IPv4addr
-	static routers=$IPv4gw
-	static domain_name_servers=$IPv4gw" | $SUDO tee -a $dhcpcdFile >/dev/null
+	if [[ $macOScheck = "Darwin" ]]; then
+		$SUDO ipconfig set $piholeInterface INFORM $piholeIP
+	else
+		# Append these lines to dhcpcd.conf to enable a static IP
+		echo "::: interface $piholeInterface
+		static ip_address=$IPv4addr
+		static routers=$IPv4gw
+		static domain_name_servers=$IPv4gw" | $SUDO tee -a $dhcpcdFile >/dev/null
+	fi
 }
 
 setStaticIPv4() {
