@@ -18,9 +18,18 @@
 
 
 ######## VARIABLES #########
+macOScheck=$(uname -a | awk '{print $1}')
 
 tmpLog=/tmp/pihole-install.log
 instalLogLoc=/etc/pihole/install.log
+# If the kernel is Darwin, assume the user wants to install this on macOS.
+if [[ "macOScheck" = "Darwin" ]];then
+	# Install Homebrew so dependencies can easily be installed via script
+	/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+else
+	# Do nothing and continue as normal
+	:
+fi
 
 webInterfaceGitUrl="https://github.com/pi-hole/AdminLTE.git"
 webInterfaceDir="/var/www/html/admin"
