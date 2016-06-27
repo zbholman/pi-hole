@@ -22,7 +22,7 @@ macOScheck=$(uname -a | awk '{print $1}')
 
 tmpLog=/tmp/pihole-install.log
 instalLogLoc=/etc/pihole/install.log
-dialogApp="whiptail"
+dialogApp="dialog"
 # If the kernel is Darwin, assume the user wants to install this on macOS.
 if [[ "macOScheck" = "Darwin" ]];then
 	# Install Homebrew so dependencies can easily be installed via script
