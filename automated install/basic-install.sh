@@ -252,7 +252,7 @@ use4andor6() {
 useIPv6dialog() {
 	# Show the IPv6 address used for blocking
 	piholeIPv6=$(ip -6 route get 2001:4860:4860::8888 | awk -F " " '{ for(i=1;i<=NF;i++) if ($i == "src") print $(i+1) }')
-	$dialogApp --msgbox --backtitle "IPv6..." --title "IPv6 Supported" "$piholeIPv6 will be used to block ads." $r $c
+	$dialogApp --backtitle "IPv6..." --title "IPv6 Supported" --msgbox "$piholeIPv6 will be used to block ads." $r $c
 
 	$SUDO touch /etc/pihole/.useIPv6
 }
