@@ -193,8 +193,8 @@ chooseInterface() {
 
 	# Find out how many interfaces are available to choose from
 	interfaceCount=$(echo "$availableInterfaces" | wc -l)
-	chooseInterfaceCmd=($dialogApp --separate-output --radiolist "Choose An Interface" $r $c $interfaceCount)
-	chooseInterfaceOptions=$("${chooseInterfaceCmd[@]}" "${interfacesArray[@]}" 2>&1 >/dev/tty)
+	chooseInterfaceCmd=($dialogApp --radiolist "'Choose An Interface'" $r $c $interfaceCount)
+	chooseInterfaceOptions=$("${chooseInterfaceCmd[@]}" "${interfacesArray[@]}" "--separate-output" 2>&1 >/dev/tty)
 	if [[ $? = 0 ]]; then
 		for desiredInterface in $chooseInterfaceOptions
 		do
