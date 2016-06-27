@@ -26,20 +26,23 @@ dialogApp="dialog"
 lighttpdDir=/etc/lighttpd
 lighttpdConf="$lighttpdDir"/lighttpd.conf
 # If the kernel is Darwin, assume the user wants to install this on macOS.
-if [[ "macOScheck" = "Darwin" ]];then
+if [[ "$macOScheck" = "Darwin" ]];then
+	echo "macOS detected."
 	lighttpdDir=/usr/local/etc/lighttpd
 	lighttpdConf="$lighttpdDir"/lighttpd.conf
 	# Install Homebrew so dependencies can easily be installed via script
 	/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-	brewCheck=$(brew doctor)
-	if [[ "$brewCheck" = "Ready to brew." ]];then
-		# whiptail is not available via Homebrew so use dialog instead
-		dialogApp="dialog"
-		brew install $dialogApp
-	else
-		# Exit since we need Homebrew to work before continuing
-		echo "Please make sure Homebrew is working by running brew doctor and resolving any errors."
-		exit 2
+	if [[ $? -eq 0 ]]; then
+		brewCheck=$(brew doctor)
+		if [[ "$brewCheck" = "Your system is ready to brew." ]];then
+			# whiptail is not available via Homebrew so use dialog instead
+			dialogApp="dialog"
+			brew install $dialogApp
+		else
+			# Exit since we need Homebrew to work before continuing
+			echo "Please make sure Homebrew is working by running brew doctor and resolving any errors."
+			exit 2
+		fi
 	fi
 else
 	# Do nothing and continue as normal
@@ -62,10 +65,15 @@ c=$(( columns / 2 ))
 
 
 # Find IP used to route to outside world
-
-IPv4dev=$(ip route get 8.8.8.8 | awk '{for(i=1;i<=NF;i++)if($i~/dev/)print $(i+1)}')
-IPv4addr=$(ip -o -f inet addr show dev "$IPv4dev" | awk '{print $4}' | awk 'END {print}')
-IPv4gw=$(ip route get 8.8.8.8 | awk '{print $3}')
+if [[ "$macOScheck" = "Darwin" ]]; then
+	IPv4dev=$(route -n get default | awk '/interface/ {print $2}')
+	IPv4addr=$(ifconfig $IPv4dev | awk '/inet/ && !/6/ {print $2}')
+	IPv4gw=$(route -n get default | awk '/gateway/ {print $2}')
+else
+	IPv4dev=$(ip route get 8.8.8.8 | awk '{for(i=1;i<=NF;i++)if($i~/dev/)print $(i+1)}')
+	IPv4addr=$(ip -o -f inet addr show dev "$IPv4dev" | awk '{print $4}' | awk 'END {print}')
+	IPv4gw=$(ip route get 8.8.8.8 | awk '{print $3}')
+fi
 
 if [[ $macOScheck = "Darwin" ]];then
 	availableInterfaces=$(networksetup listallhardwareports | awk '/Device:/ {print $2}')
