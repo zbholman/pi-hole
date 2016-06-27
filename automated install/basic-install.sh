@@ -26,6 +26,15 @@ instalLogLoc=/etc/pihole/install.log
 if [[ "macOScheck" = "Darwin" ]];then
 	# Install Homebrew so dependencies can easily be installed via script
 	/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+	brewCheck=$(brew doctor)
+	if [[ "$brewCheck" = "Ready to brew." ]];then
+		# whiptail is not available via Homebrew so use dialog instead
+		brew install dialog
+	else
+		# Exit since we need Homebrew to work before continuing
+		echo "Please make sure Homebrew is working by running brew doctor and resolving any errors."
+		exit 2
+	fi
 else
 	# Do nothing and continue as normal
 	:
@@ -534,7 +543,6 @@ checkForDependencies() {
 	timestamp=$(stat -c %Y /var/cache/apt/)
 	timestampAsDate=$(date -d @"$timestamp" "+%b %e")
 	today=$(date "+%b %e")
-
 	if [ ! "$today" == "$timestampAsDate" ]; then
 		#update package lists
 		echo ":::"
