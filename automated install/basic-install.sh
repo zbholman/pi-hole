@@ -118,27 +118,6 @@ spinner()
     printf "    \b\b\b\b"
 }
 
-backupLegacyPihole() {
-	# This function detects and backups the pi-hole v1 files.  It will not do anything to the current version files.
-	if [[ -f /etc/dnsmasq.d/adList.conf ]];then
-		echo "::: Original Pi-hole detected.  Initiating sub space transport"
-		$SUDO mkdir -p /etc/pihole/original/
-		$SUDO mv /etc/dnsmasq.d/adList.conf /etc/pihole/original/adList.conf."$(date "+%Y-%m-%d")"
-		$SUDO mv /etc/dnsmasq.conf /etc/pihole/original/dnsmasq.conf."$(date "+%Y-%m-%d")"
-		$SUDO mv /etc/resolv.conf /etc/pihole/original/resolv.conf."$(date "+%Y-%m-%d")"
-		$SUDO mv $lighttpdConf /etc/pihole/original/lighttpd.conf."$(date "+%Y-%m-%d")"
-		$SUDO mv /var/www/pihole/index.html /etc/pihole/original/index.html."$(date "+%Y-%m-%d")"
-		if [ ! -d /opt/pihole ]; then
-			$SUDO mkdir /opt/pihole
-			$SUDO chown "$USER":root /opt/pihole
-			$SUDO chmod u+srwx /opt/pihole
-		fi
-		$SUDO mv /opt/pihole/gravity.sh /etc/pihole/original/gravity.sh."$(date "+%Y-%m-%d")"
-	else
-		:
-	fi
-}
-
 welcomeDialogs() {
 	# Display the welcome dialog
   $dialogApp --backtitle 'Welcome' --title 'Pi-hole automated installer' --msgbox 'This installer will transform your Raspberry Pi into a network-wide ad blocker!' $r $c
