@@ -22,6 +22,7 @@ macOScheck=$(uname -a | awk '{print $1}')
 
 tmpLog=/tmp/pihole-install.log
 instalLogLoc=/etc/pihole/install.log
+dialogApp="whiptail"
 # If the kernel is Darwin, assume the user wants to install this on macOS.
 if [[ "macOScheck" = "Darwin" ]];then
 	# Install Homebrew so dependencies can easily be installed via script
@@ -29,7 +30,8 @@ if [[ "macOScheck" = "Darwin" ]];then
 	brewCheck=$(brew doctor)
 	if [[ "$brewCheck" = "Ready to brew." ]];then
 		# whiptail is not available via Homebrew so use dialog instead
-		brew install dialog
+		dialogApp="dialog"
+		brew install $dialogApp
 	else
 		# Exit since we need Homebrew to work before continuing
 		echo "Please make sure Homebrew is working by running brew doctor and resolving any errors."
@@ -121,13 +123,13 @@ backupLegacyPihole() {
 
 welcomeDialogs() {
 	# Display the welcome dialog
-	whiptail --msgbox --backtitle "Welcome" --title "Pi-hole automated installer" "This installer will transform your Raspberry Pi into a network-wide ad blocker!" $r $c
+	$dialogApp --msgbox --backtitle "Welcome" --title "Pi-hole automated installer" "This installer will transform your Raspberry Pi into a network-wide ad blocker!" $r $c
 
 	# Support for a part-time dev
-	whiptail --msgbox --backtitle "Plea" --title "Free and open source" "The Pi-hole is free, but powered by your donations:  http://pi-hole.net/donate" $r $c
+	$dialogApp --msgbox --backtitle "Plea" --title "Free and open source" "The Pi-hole is free, but powered by your donations:  http://pi-hole.net/donate" $r $c
 
 	# Explain the need for a static address
-	whiptail --msgbox --backtitle "Initating network interface" --title "Static IP Needed" "The Pi-hole is a SERVER so it needs a STATIC IP ADDRESS to function properly.
+	$dialogApp --msgbox --backtitle "Initating network interface" --title "Static IP Needed" "The Pi-hole is a SERVER so it needs a STATIC IP ADDRESS to function properly.
 
 In the next section, you can choose to use your current network settings (DHCP) or to manually edit them." $r $c
 }
@@ -143,7 +145,7 @@ verifyFreeDiskSpace() {
 	fi
 
 	if [[ $existingFreeBytes -lt $requiredFreeBytes ]]; then
-		whiptail --msgbox --backtitle "Insufficient Disk Space" --title "Insufficient Disk Space" "\nYour system appears to be low on disk space. pi-hole recomends a minimum of $requiredFreeBytes Bytes.\nYou only have $existingFreeBytes Free.\n\nIf this is a new install you may need to expand your disk.\n\nTry running:\n    'sudo raspi-config'\nChoose the 'expand file system option'\n\nAfter rebooting, run this installation again.\n\ncurl -L install.pi-hole.net | bash\n" $r $c
+		$dialogApp --msgbox --backtitle "Insufficient Disk Space" --title "Insufficient Disk Space" "\nYour system appears to be low on disk space. pi-hole recomends a minimum of $requiredFreeBytes Bytes.\nYou only have $existingFreeBytes Free.\n\nIf this is a new install you may need to expand your disk.\n\nTry running:\n    'sudo raspi-config'\nChoose the 'expand file system option'\n\nAfter rebooting, run this installation again.\n\ncurl -L install.pi-hole.net | bash\n" $r $c
 		echo "$existingFreeBytes is less than $requiredFreeBytes"
 		echo "Insufficient free space, exiting..."
 		exit 1
@@ -168,7 +170,7 @@ chooseInterface() {
 
 	# Find out how many interfaces are available to choose from
 	interfaceCount=$(echo "$availableInterfaces" | wc -l)
-	chooseInterfaceCmd=(whiptail --separate-output --radiolist "Choose An Interface" $r $c $interfaceCount)
+	chooseInterfaceCmd=($dialogApp --separate-output --radiolist "Choose An Interface" $r $c $interfaceCount)
 	chooseInterfaceOptions=$("${chooseInterfaceCmd[@]}" "${interfacesArray[@]}" 2>&1 >/dev/tty)
 	if [[ $? = 0 ]]; then
 		for desiredInterface in $chooseInterfaceOptions
@@ -193,7 +195,7 @@ cleanupIPv6() {
 
 use4andor6() {
 	# Let use select IPv4 and/or IPv6
-	cmd=(whiptail --separate-output --checklist "Select Protocols (press space to select)" $r $c 2)
+	cmd=($dialogApp --separate-output --checklist "Select Protocols (press space to select)" $r $c 2)
 	options=(IPv4 "Block ads over IPv4" on
 	IPv6 "Block ads over IPv6" off)
 	choices=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
@@ -239,18 +241,18 @@ use4andor6() {
 useIPv6dialog() {
 	# Show the IPv6 address used for blocking
 	piholeIPv6=$(ip -6 route get 2001:4860:4860::8888 | awk -F " " '{ for(i=1;i<=NF;i++) if ($i == "src") print $(i+1) }')
-	whiptail --msgbox --backtitle "IPv6..." --title "IPv6 Supported" "$piholeIPv6 will be used to block ads." $r $c
+	$dialogApp --msgbox --backtitle "IPv6..." --title "IPv6 Supported" "$piholeIPv6 will be used to block ads." $r $c
 
 	$SUDO touch /etc/pihole/.useIPv6
 }
 
 getStaticIPv4Settings() {
 	# Ask if the user wants to use DHCP settings as their static IP
-	if (whiptail --backtitle "Calibrating network interface" --title "Static IP Address" --yesno "Do you want to use your current network settings as a static address?
+	if ($dialogApp --backtitle "Calibrating network interface" --title "Static IP Address" --yesno "Do you want to use your current network settings as a static address?
 					IP address:    $IPv4addr
 					Gateway:       $IPv4gw" $r $c) then
 		# If they choose yes, let the user know that the IP address will not be available via DHCP and may cause a conflict.
-		whiptail --msgbox --backtitle "IP information" --title "FYI: IP Conflict" "It is possible your router could still try to assign this IP to a device, which would cause a conflict.  But in most cases the router is smart enough to not do that.
+		$dialogApp --msgbox --backtitle "IP information" --title "FYI: IP Conflict" "It is possible your router could still try to assign this IP to a device, which would cause a conflict.  But in most cases the router is smart enough to not do that.
 If you are worried, either manually set the address, or modify the DHCP reservation pool so it does not include the IP you want.
 It is also possible to use a DHCP reservation, but if you are going to do that, you might as well set a static address." $r $c
 		#piholeIP is saved to a permanent file so gravity.sh can use it when updating
@@ -263,15 +265,15 @@ It is also possible to use a DHCP reservation, but if you are going to do that, 
 		until [[ $ipSettingsCorrect = True ]]
 		do
 			# Ask for the IPv4 address
-			IPv4addr=$(whiptail --backtitle "Calibrating network interface" --title "IPv4 address" --inputbox "Enter your desired IPv4 address" $r $c "$IPv4addr" 3>&1 1>&2 2>&3)
+			IPv4addr=$($dialogApp --backtitle "Calibrating network interface" --title "IPv4 address" --inputbox "Enter your desired IPv4 address" $r $c "$IPv4addr" 3>&1 1>&2 2>&3)
 			if [[ $? = 0 ]];then
 			echo "::: Your static IPv4 address:    $IPv4addr"
 			# Ask for the gateway
-			IPv4gw=$(whiptail --backtitle "Calibrating network interface" --title "IPv4 gateway (router)" --inputbox "Enter your desired IPv4 default gateway" $r $c "$IPv4gw" 3>&1 1>&2 2>&3)
+			IPv4gw=$($dialogApp --backtitle "Calibrating network interface" --title "IPv4 gateway (router)" --inputbox "Enter your desired IPv4 default gateway" $r $c "$IPv4gw" 3>&1 1>&2 2>&3)
 			if [[ $? = 0 ]];then
 				echo "::: Your static IPv4 gateway:    $IPv4gw"
 				# Give the user a chance to review their settings before moving on
-				if (whiptail --backtitle "Calibrating network interface" --title "Static IP Address" --yesno "Are these settings correct?
+				if ($dialogApp --backtitle "Calibrating network interface" --title "Static IP Address" --yesno "Are these settings correct?
 					IP address:    $IPv4addr
 					Gateway:       $IPv4gw" $r $c)then
 					# If the settings are correct, then we need to set the piholeIP
@@ -341,7 +343,7 @@ function valid_ip()
 }
 
 setDNS(){
-	DNSChoseCmd=(whiptail --separate-output --radiolist "Select Upstream DNS Provider. To use your own, select Custom." $r $c 6)
+	DNSChoseCmd=($dialogApp --separate-output --radiolist "Select Upstream DNS Provider. To use your own, select Custom." $r $c 6)
 	DNSChooseOptions=(Google "" on
 			OpenDNS "" off
 			Level3 "" off
@@ -391,7 +393,7 @@ setDNS(){
 				elif [ $piholeDNS1 ] && [ $piholeDNS2 ]; then
 					prePopulate="$piholeDNS1, $piholeDNS2"
 				fi
-				piholeDNS=$(whiptail --backtitle "Specify Upstream DNS Provider(s)"  --inputbox "Enter your desired upstream DNS provider(s), seperated by a comma.\n\nFor example '8.8.8.8, 8.8.4.4'" $r $c "$prePopulate" 3>&1 1>&2 2>&3)
+				piholeDNS=$($dialogApp --backtitle "Specify Upstream DNS Provider(s)"  --inputbox "Enter your desired upstream DNS provider(s), seperated by a comma.\n\nFor example '8.8.8.8, 8.8.4.4'" $r $c "$prePopulate" 3>&1 1>&2 2>&3)
 				if [[ $? = 0 ]];then
 					piholeDNS1=$(echo "$piholeDNS" | sed 's/[, \t]\+/,/g' | awk -F, '{print$1}')
 					piholeDNS2=$(echo "$piholeDNS" | sed 's/[, \t]\+/,/g' | awk -F, '{print$2}')
@@ -406,7 +408,7 @@ setDNS(){
 					exit 1
 				fi
 				if [[ $piholeDNS1 == "$strInvalid" ]] || [[ $piholeDNS2 == "$strInvalid" ]]; then
-					whiptail --msgbox --backtitle "Invalid IP" --title "Invalid IP" "One or both entered IP addresses were invalid. Please try again.\n\n    DNS Server 1:   $piholeDNS1\n    DNS Server 2:   $piholeDNS2" $r $c
+					$dialogApp --msgbox --backtitle "Invalid IP" --title "Invalid IP" "One or both entered IP addresses were invalid. Please try again.\n\n    DNS Server 1:   $piholeDNS1\n    DNS Server 2:   $piholeDNS2" $r $c
 					if [[ $piholeDNS1 == "$strInvalid" ]]; then
 						piholeDNS1=""
 					fi
@@ -415,7 +417,7 @@ setDNS(){
 					fi
 					DNSSettingsCorrect=False
 				else
-					if (whiptail --backtitle "Specify Upstream DNS Provider(s)" --title "Upstream DNS Provider(s)" --yesno "Are these settings correct?\n    DNS Server 1:   $piholeDNS1\n    DNS Server 2:   $piholeDNS2" $r $c) then
+					if ($dialogApp --backtitle "Specify Upstream DNS Provider(s)" --title "Upstream DNS Provider(s)" --yesno "Are these settings correct?\n    DNS Server 1:   $piholeDNS1\n    DNS Server 2:   $piholeDNS2" $r $c) then
 						DNSSettingsCorrect=True
 					else
 						# If the settings are wrong, the loop continues
@@ -719,7 +721,7 @@ installPihole() {
 
 displayFinalMessage() {
 	# Final completion message to user
-	whiptail --msgbox --backtitle "Make it so." --title "Installation Complete!" "Configure your devices to use the Pi-hole as their DNS server using:
+	$dialogApp --msgbox --backtitle "Make it so." --title "Installation Complete!" "Configure your devices to use the Pi-hole as their DNS server using:
 
 IPv4:	${IPv4addr%/*}
 IPv6:	$piholeIPv6
