@@ -23,8 +23,10 @@ macOScheck=$(uname -a | awk '{print $1}')
 tmpLog=/tmp/pihole-install.log
 instalLogLoc=/etc/pihole/install.log
 dialogApp="dialog"
+lighttpdDir=/etc/lighttpd/
 # If the kernel is Darwin, assume the user wants to install this on macOS.
 if [[ "macOScheck" = "Darwin" ]];then
+	lighttpdDir=/usr/local/etc/lighttpd/
 	# Install Homebrew so dependencies can easily be installed via script
 	/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 	brewCheck=$(brew doctor)
@@ -585,12 +587,12 @@ checkForDependencies() {
   dependencies=( dnsutils bc dnsmasq lighttpd php5-common php5-cgi php5 git curl unzip wget sudo)
 	for i in "${dependencies[@]}"; do
 		echo -n ":::    Checking for $i..."
-		if [ "$(dpkg-query -W -f='${Status}' "$i" 2>/dev/null | grep -c "ok installed")" -eq 0 ]; then
-			echo -n " Not found! Installing...."
-			$SUDO apt-get -y -qq install "$i" > /dev/null & spinner $!
-			echo " done!"
-		else
-			echo " already installed!"
+			if [ "$(dpkg-query -W -f='${Status}' "$i" 2>/dev/null | grep -c "ok installed")" -eq 0 ]; then
+				echo -n " Not found! Installing...."
+				$SUDO apt-get -y -qq install "$i" > /dev/null & spinner $!
+				echo " done!"
+			else
+				echo " already installed!"
 		fi
 	done
 }
