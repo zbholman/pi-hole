@@ -599,6 +599,11 @@ checkForDependencies() {
 	done
 }
 
+macOSstuff() {
+	brew services start lighttpd
+
+}
+
 getGitFiles() {
 	# Setup git repos for base files and web admin
 	echo ":::"
