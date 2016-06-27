@@ -23,10 +23,12 @@ macOScheck=$(uname -a | awk '{print $1}')
 tmpLog=/tmp/pihole-install.log
 instalLogLoc=/etc/pihole/install.log
 dialogApp="dialog"
-lighttpdDir=/etc/lighttpd/
+lighttpdDir=/etc/lighttpd
+lighttpdConf="$lighttpdDir"/lighttpd.conf
 # If the kernel is Darwin, assume the user wants to install this on macOS.
 if [[ "macOScheck" = "Darwin" ]];then
-	lighttpdDir=/usr/local/etc/lighttpd/
+	lighttpdDir=/usr/local/etc/lighttpd
+	lighttpdConf="$lighttpdDir"/lighttpd.conf
 	# Install Homebrew so dependencies can easily be installed via script
 	/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 	brewCheck=$(brew doctor)
