@@ -123,15 +123,15 @@ backupLegacyPihole() {
 
 welcomeDialogs() {
 	# Display the welcome dialog
-	$dialogApp --msgbox --backtitle "Welcome" --title "Pi-hole automated installer" "This installer will transform your Raspberry Pi into a network-wide ad blocker!" $r $c
+  $dialogApp --backtitle 'Welcome' --title 'Pi-hole automated installer' --msgbox 'This installer will transform your Raspberry Pi into a network-wide ad blocker!' $r $c
 
 	# Support for a part-time dev
-	$dialogApp --msgbox --backtitle "Plea" --title "Free and open source" "The Pi-hole is free, but powered by your donations:  http://pi-hole.net/donate" $r $c
+	$dialogApp --backtitle 'Plea' --title 'Free and open source' --msgbox  'The Pi-hole is free, but powered by your donations:  http://pi-hole.net/donate' $r $c
 
 	# Explain the need for a static address
-	$dialogApp --msgbox --backtitle "Initating network interface" --title "Static IP Needed" "The Pi-hole is a SERVER so it needs a STATIC IP ADDRESS to function properly.
+	$dialogApp --backtitle 'Initating network interface' --title 'Static IP Needed' --msgbox 'The Pi-hole is a SERVER so it needs a STATIC IP ADDRESS to function properly.
 
-In the next section, you can choose to use your current network settings (DHCP) or to manually edit them." $r $c
+In the next section, you can choose to use your current network settings (DHCP) or to manually edit them.' $r $c
 }
 
 
