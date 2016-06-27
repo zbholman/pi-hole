@@ -145,7 +145,12 @@ verifyFreeDiskSpace() {
 	fi
 
 	if [[ $existingFreeBytes -lt $requiredFreeBytes ]]; then
-		$dialogApp --msgbox --backtitle "Insufficient Disk Space" --title "Insufficient Disk Space" "\nYour system appears to be low on disk space. pi-hole recomends a minimum of $requiredFreeBytes Bytes.\nYou only have $existingFreeBytes Free.\n\nIf this is a new install you may need to expand your disk.\n\nTry running:\n    'sudo raspi-config'\nChoose the 'expand file system option'\n\nAfter rebooting, run this installation again.\n\ncurl -L install.pi-hole.net | bash\n" $r $c
+		# macOS doesn't have raspi-config so just explain the amount of disk space required
+		if [[ "$macOScheck" == "Darwin" ]];then
+			$dialogApp --backtitle 'Insufficient Disk Space' --title 'Insufficient Disk Space' --msgbox "\nYour system appears to be low on disk space. pi-hole recomends a minimum of $requiredFreeBytes Bytes.\nYou only have $existingFreeBytes Free." $r $c
+		else
+			$dialogApp --backtitle 'Insufficient Disk Space' --title 'Insufficient Disk Space' --msgbox "\nYour system appears to be low on disk space. pi-hole recomends a minimum of $requiredFreeBytes Bytes.\nYou only have $existingFreeBytes Free.\n\nIf this is a new install you may need to expand your disk.\n\nTry running:\n    'sudo raspi-config'\nChoose the 'expand file system option'\n\nAfter rebooting, run this installation again.\n\ncurl -L install.pi-hole.net | bash\n" $r $c
+		fi
 		echo "$existingFreeBytes is less than $requiredFreeBytes"
 		echo "Insufficient free space, exiting..."
 		exit 1
