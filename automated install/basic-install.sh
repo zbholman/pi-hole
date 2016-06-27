@@ -118,7 +118,7 @@ backupLegacyPihole() {
 		$SUDO mv /etc/dnsmasq.d/adList.conf /etc/pihole/original/adList.conf."$(date "+%Y-%m-%d")"
 		$SUDO mv /etc/dnsmasq.conf /etc/pihole/original/dnsmasq.conf."$(date "+%Y-%m-%d")"
 		$SUDO mv /etc/resolv.conf /etc/pihole/original/resolv.conf."$(date "+%Y-%m-%d")"
-		$SUDO mv /etc/lighttpd/lighttpd.conf /etc/pihole/original/lighttpd.conf."$(date "+%Y-%m-%d")"
+		$SUDO mv $lighttpdConf /etc/pihole/original/lighttpd.conf."$(date "+%Y-%m-%d")"
 		$SUDO mv /var/www/pihole/index.html /etc/pihole/original/index.html."$(date "+%Y-%m-%d")"
 		if [ ! -d /opt/pihole ]; then
 			$SUDO mkdir /opt/pihole
@@ -536,12 +536,12 @@ installConfigs() {
 	$SUDO echo ":::"
 	$SUDO echo "::: Installing configs..."
 	versionCheckDNSmasq
-	if [ ! -d "/etc/lighttpd" ]; then
-		$SUDO mkdir /etc/lighttpd
-		$SUDO chown "$USER":root /etc/lighttpd
-		$SUDO mv /etc/lighttpd/lighttpd.conf /etc/lighttpd/lighttpd.conf.orig
+	if [ ! -d "$lighttpdDir" ]; then
+		$SUDO mkdir $lighttpdDir
+		$SUDO chown "$USER":root $lighttpdDir
+		$SUDO mv $lighttpdDir/lighttpd.conf $lighttpdConf.orig
 	fi
-	$SUDO cp /etc/.pihole/advanced/lighttpd.conf /etc/lighttpd/lighttpd.conf
+	$SUDO cp /etc/.pihole/advanced/lighttpd.conf $lighttpdConf
 }
 
 stopServices() {
