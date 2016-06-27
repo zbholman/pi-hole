@@ -131,7 +131,6 @@ welcomeDialogs() {
 In the next section, you can choose to use your current network settings (DHCP) or to manually edit them.' $r $c
 }
 
-
 verifyFreeDiskSpace() {
 	# 50MB is the minimum space needed (45MB install (includes web admin bootstrap/jquery libraries etc) + 5MB one day of logs.)
 	requiredFreeBytes=51200
@@ -190,7 +189,7 @@ chooseInterface() {
 
 cleanupIPv6() {
 	# Removes IPv6 indicator file if we are not using IPv6
-	if [ -f "/etc/pihole/.useIPv6" ] && [ ! "$useIPv6" ]; then
+	if [[ -f "/etc/pihole/.useIPv6" ]] && [[ ! "$useIPv6" ]]; then
 		rm /etc/pihole/.useIPv6
 	fi
 }
@@ -216,19 +215,19 @@ use4andor6() {
 			echo "::: Using IPv4 on $IPv4addr"
 			echo "::: IPv6 will NOT be used."
 		fi
-		if [ ! $useIPv4 ] && [ $useIPv6 ]; then
+		if [[ ! $useIPv4 ]] && [[ $useIPv6 ]]; then
 			useIPv6dialog
 			echo "::: IPv4 will NOT be used."
 			echo "::: Using IPv6 on $piholeIPv6"
 		fi
-		if [ $useIPv4 ] && [  $useIPv6 ]; then
+		if [[ $useIPv4 ]] && [[  $useIPv6 ]]; then
 			getStaticIPv4Settings
 			setStaticIPv4
 			useIPv6dialog
 			echo "::: Using IPv4 on $IPv4addr"
 			echo "::: Using IPv6 on $piholeIPv6"
 		fi
-		if [ ! $useIPv4 ] && [ ! $useIPv6 ]; then
+		if [[ ! $useIPv4 ]] && [[ ! $useIPv6 ]]; then
 			echo "::: Cannot continue, neither IPv4 or IPv6 selected"
 			echo "::: Exiting"
 			exit 1
