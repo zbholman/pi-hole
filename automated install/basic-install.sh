@@ -360,14 +360,14 @@ function valid_ip()
 }
 
 setDNS(){
-	DNSChoseCmd=($dialogApp --separate-output --radiolist "Select Upstream DNS Provider. To use your own, select Custom." $r $c 6)
+	DNSChoseCmd=($dialogApp --radiolist "Select Upstream DNS Provider. To use your own, select Custom." $r $c 6)
 	DNSChooseOptions=(Google "" on
 			OpenDNS "" off
 			Level3 "" off
 			Norton "" off
 			Comodo "" off
 			Custom "" off)
-	DNSchoices=$("${DNSChoseCmd[@]}" "${DNSChooseOptions[@]}" 2>&1 >/dev/tty)
+	DNSchoices=$("${DNSChoseCmd[@]}" "${DNSChooseOptions[@]}" --separate-output 2>&1 >/dev/tty)
 	if [[ $? = 0 ]];then
 		case $DNSchoices in
 		Google)
@@ -399,25 +399,25 @@ setDNS(){
 			until [[ $DNSSettingsCorrect = True ]]
 			do
 				strInvalid="Invalid"
-				if [ ! $piholeDNS1 ]; then
-					if [ ! $piholeDNS2 ]; then
+				if [[ ! $piholeDNS1 ]]; then
+					if [[ ! $piholeDNS2 ]]; then
 						prePopulate=""
 					else
 						prePopulate=", $piholeDNS2"
 					fi
-				elif  [ $piholeDNS1 ] && [ ! $piholeDNS2 ]; then
+				elif  [[ $piholeDNS1 ]] && [[ ! $piholeDNS2 ]]; then
 					prePopulate="$piholeDNS1"
-				elif [ $piholeDNS1 ] && [ $piholeDNS2 ]; then
+				elif [[ $piholeDNS1 ]] && [[ $piholeDNS2 ]]; then
 					prePopulate="$piholeDNS1, $piholeDNS2"
 				fi
 				piholeDNS=$($dialogApp --backtitle "Specify Upstream DNS Provider(s)"  --inputbox "Enter your desired upstream DNS provider(s), seperated by a comma.\n\nFor example '8.8.8.8, 8.8.4.4'" $r $c "$prePopulate" 3>&1 1>&2 2>&3)
 				if [[ $? = 0 ]];then
 					piholeDNS1=$(echo "$piholeDNS" | sed 's/[, \t]\+/,/g' | awk -F, '{print$1}')
 					piholeDNS2=$(echo "$piholeDNS" | sed 's/[, \t]\+/,/g' | awk -F, '{print$2}')
-					if ! valid_ip "$piholeDNS1" || [ ! "$piholeDNS1" ]; then
+					if ! valid_ip "$piholeDNS1" || [[ ! "$piholeDNS1" ]]; then
 						piholeDNS1=$strInvalid
 					fi
-					if ! valid_ip "$piholeDNS2" && [ "$piholeDNS2" ]; then
+					if ! valid_ip "$piholeDNS2" && [[ "$piholeDNS2" ]]; then
 						piholeDNS2=$strInvalid
 					fi
 				else
