@@ -25,16 +25,27 @@ instalLogLoc=/etc/pihole/install.log
 dialogApp="dialog"
 lighttpdDir=/etc/lighttpd
 lighttpdConf="$lighttpdDir"/lighttpd.conf
+webInterfaceGitUrl="https://github.com/pi-hole/AdminLTE.git"
+piholeGitUrl="https://github.com/pi-hole/pi-hole.git"
+webInterfaceDir="/var/www/html/admin"
+piholeFilesDir="/etc/.pihole"
+dhcpcdFile=/etc/dhcpcd.conf
+
 # If the kernel is Darwin, assume the user wants to install this on macOS.
 if [[ "$macOScheck" = "Darwin" ]];then
 	echo "macOS detected."
-	lighttpdDir=/usr/local/etc/lighttpd
-	lighttpdConf="$lighttpdDir"/lighttpd.conf
 	# Install Homebrew so dependencies can easily be installed via script
 	/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 	if [[ $? -eq 0 ]]; then
 		brewCheck=$(brew doctor)
 		if [[ "$brewCheck" = "Your system is ready to brew." ]];then
+			# Set some variables specific to macOS
+			lighttpdDir=$(brew --prefix dnsmasq)/etc/lighttpd
+			lighttpdConf="$lighttpdDir"/lighttpd.conf
+			webInterfaceDir="$(brew --prefix dnsmasq)/var/www/html/admin"
+			piholeDir=$webInterfaceDir/pihole
+			piholeFilesDir="$(brew --prefix dnsmasq)/etc/.pihole"
+			dnsmasqConf="$(brew --prefix dnsmasq)/etc/dnsmasq.conf"
 			# whiptail is not available via Homebrew so use dialog instead
 			dialogApp="dialog"
 			brew install $dialogApp
@@ -48,12 +59,6 @@ else
 	# Do nothing and continue as normal
 	:
 fi
-
-webInterfaceGitUrl="https://github.com/pi-hole/AdminLTE.git"
-webInterfaceDir="/var/www/html/admin"
-piholeGitUrl="https://github.com/pi-hole/pi-hole.git"
-piholeFilesDir="/etc/.pihole"
-
 
 # Find the rows and columns
 rows=$(tput lines)
@@ -75,14 +80,13 @@ else
 	IPv4gw=$(ip route get 8.8.8.8 | awk '{print $3}')
 fi
 
+# Find the available interfaces, which will be used in a dialog later in the installer
 if [[ $macOScheck = "Darwin" ]];then
 	availableInterfaces=$(networksetup listallhardwareports | awk '/Device:/ {print $2}')
 	# availableInterfaces=$(networksetup listallhardwareports | awk '/Hardware Port:/ {$1=$2=""; print $0}')
 else
 	availableInterfaces=$(ip -o link | awk '{print $2}' | grep -v "lo" | cut -d':' -f1 | cut -d'@' -f1)
 fi
-
-dhcpcdFile=/etc/dhcpcd.conf
 
 ######## FIRST CHECK ########
 # Must be root to install
