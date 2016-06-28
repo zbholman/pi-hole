@@ -155,7 +155,7 @@ verifyFreeDiskSpace() {
 
 
 chooseInterface() {
-	# Turn the available interfaces into an array so it can be used with a whiptail dialog
+	# Turn the available interfaces into an array so it can be used with a dialog
 	interfacesArray=()
 	firstloop=1
 
@@ -196,10 +196,10 @@ cleanupIPv6() {
 
 use4andor6() {
 	# Let use select IPv4 and/or IPv6
-	cmd=($dialogApp --separate-output --checklist "Select Protocols (press space to select)" $r $c 2)
+	cmd=($dialogApp --checklist "Select Protocols (press space to select)" $r $c 2)
 	options=(IPv4 "Block ads over IPv4" on
 	IPv6 "Block ads over IPv6" off)
-	choices=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
+	choices=$("${cmd[@]}" "${options[@]}" --separate-output 2>&1 >/dev/tty)
 	if [[ $? = 0 ]];then
 		for choice in $choices
 		do
@@ -209,7 +209,7 @@ use4andor6() {
 			esac
 		done
 
-		if [ $useIPv4 ] && [ ! $useIPv6 ]; then
+		if [[ $useIPv4 ]] && [[ ! $useIPv6 ]]; then
 			getStaticIPv4Settings
 			setStaticIPv4
 			echo "::: Using IPv4 on $IPv4addr"
@@ -306,7 +306,8 @@ It is also possible to use a DHCP reservation, but if you are going to do that, 
 
 setDHCPCD() {
 	if [[ $macOScheck = "Darwin" ]]; then
-		$SUDO ipconfig set $piholeInterface INFORM $piholeIP
+		# macOS does not use this dhcpcd.conf
+		:
 	else
 		# Append these lines to dhcpcd.conf to enable a static IP
 		echo "::: interface $piholeInterface
@@ -317,16 +318,27 @@ setDHCPCD() {
 }
 
 setStaticIPv4() {
-	# Tries to set the IPv4 address
-	if grep -q "$IPv4addr" $dhcpcdFile; then
-		# address already set, noop
-		:
+	if [[ $macOScheck = "Darwin" ]]; then
+		currentIPv4=$(ifconfig $IPv4dev | awk '/inet/ && !/6/ {print $2}')
+		if [[ "$currentIPv4" = "$piholeIP" ]]; then
+			# The address is already set
+			:
+		else
+			# macoS uses ipconfig to set a static address
+			$SUDO ipconfig set $piholeInterface INFORM $piholeIP
+		fi
 	else
-		setDHCPCD
-		$SUDO ip addr replace dev "$piholeInterface" "$IPv4addr"
-		echo ":::"
-		echo "::: Setting IP to $IPv4addr.  You may need to restart after the install is complete."
-		echo ":::"
+		# Tries to set the IPv4 address
+		if grep -q "$IPv4addr" $dhcpcdFile; then
+			# address already set, noop
+			:
+		else
+			setDHCPCD
+			$SUDO ip addr replace dev "$piholeInterface" "$IPv4addr"
+			echo ":::"
+			echo "::: Setting IP to $IPv4addr.  You may need to restart after the install is complete."
+			echo ":::"
+		fi
 	fi
 }
 
