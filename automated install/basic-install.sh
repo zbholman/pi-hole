@@ -425,7 +425,7 @@ setDNS(){
 					exit 1
 				fi
 				if [[ $piholeDNS1 == "$strInvalid" ]] || [[ $piholeDNS2 == "$strInvalid" ]]; then
-					$dialogApp --msgbox --backtitle "Invalid IP" --title "Invalid IP" "One or both entered IP addresses were invalid. Please try again.\n\n    DNS Server 1:   $piholeDNS1\n    DNS Server 2:   $piholeDNS2" $r $c
+					$dialogApp --backtitle "Invalid IP" --title "Invalid IP" --msgbox "One or both entered IP addresses were invalid. Please try again.\n\n    DNS Server 1:   $piholeDNS1\n    DNS Server 2:   $piholeDNS2" $r $c
 					if [[ $piholeDNS1 == "$strInvalid" ]]; then
 						piholeDNS1=""
 					fi
@@ -459,7 +459,7 @@ versionCheckDNSmasq(){
 	newFileToInstall="/etc/.pihole/advanced/01-pihole.conf"
 	newFileFinalLocation="/etc/dnsmasq.d/01-pihole.conf"
 
-	if [ -f $dnsFile1 ]; then
+	if [[ -f $dnsFile1 ]]; then
 		echo -n ":::    Existing dnsmasq.conf found..."
 		if grep -q $dnsSearch $dnsFile1; then
 			echo " it is from a previous pi-hole install."
