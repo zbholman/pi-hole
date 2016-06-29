@@ -598,13 +598,25 @@ checkForDependencies() {
   dependencies=( dnsutils bc dnsmasq lighttpd php5-common php5-cgi php5 git curl unzip wget sudo)
 	for i in "${dependencies[@]}"; do
 		echo -n ":::    Checking for $i..."
-			if [ "$(dpkg-query -W -f='${Status}' "$i" 2>/dev/null | grep -c "ok installed")" -eq 0 ]; then
-				echo -n " Not found! Installing...."
-				$SUDO apt-get -y -qq install "$i" > /dev/null & spinner $!
-				echo " done!"
+			if [[ "$macOScheck" = "Darwin" ]]; then
+				case "$i" in
+					dnsutils) echo "  no need for $i with macOS."
+					bc) echo "  no need for $i with macOS."
+					php5-common) echo "  no need for $i with macOS."
+					php5-cgi) echo "  no need for $i with macOS."
+					curl) echo "  no need for $i with macOS."
+					wget) echo "  no need for $i with macOS."
+					*) brew install "$i";;
+				esac
 			else
-				echo " already installed!"
-		fi
+				if [[ "$(dpkg-query -W -f='${Status}' "$i" 2>/dev/null | grep -c "ok installed")" -eq 0 ]]; then
+					echo -n " Not found! Installing...."
+					$SUDO apt-get -y -qq install "$i" > /dev/null & spinner $!
+					echo " done!"
+				else
+					echo " already installed!"
+			  fi
+			fi
 	done
 }
 
