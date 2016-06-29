@@ -47,7 +47,7 @@ if [[ "$macOScheck" = "Darwin" ]];then
 			lighttpdConf="$lighttpdDir"/lighttpd.conf
 			webInterfaceDir="$(brew --prefix dnsmasq)/var/www/html/admin"
 			piholeDir=$webInterfaceDir/pihole
-			piholeFilesDir="$(brew --prefix dnsmasq)/etc/.pihole"
+			piholeFilesDir="$(brew --prefix dnsmasq)$piholeFilesDir"
 			dnsmasqDir="$(brew --prefix dnsmasq)/etc"
 			dnsmasqConf="$(brew --prefix dnsmasq)/etc/dnsmasq.conf"
 			# whiptail is not available via Homebrew so use dialog instead
@@ -506,30 +506,30 @@ installScripts() {
 	# Install the scripts from /etc/.pihole to their various locations
 	$SUDO echo ":::"
 	$SUDO echo -n "::: Installing scripts to /opt/pihole..."
-	if [ ! -d /opt/pihole ]; then
+	if [[ ! -d /opt/pihole ]]; then
 		$SUDO mkdir /opt/pihole
 		$SUDO chown "$USER":root /opt/pihole
 		$SUDO chmod u+srwx /opt/pihole
 	fi
-	$SUDO cp /etc/.pihole/gravity.sh /opt/pihole/gravity.sh
-	$SUDO cp /etc/.pihole/advanced/Scripts/chronometer.sh /opt/pihole/chronometer.sh
-	$SUDO cp /etc/.pihole/advanced/Scripts/whitelist.sh /opt/pihole/whitelist.sh
-	$SUDO cp /etc/.pihole/advanced/Scripts/blacklist.sh /opt/pihole/blacklist.sh
-	$SUDO cp /etc/.pihole/advanced/Scripts/piholeDebug.sh /opt/pihole/piholeDebug.sh
-	$SUDO cp /etc/.pihole/advanced/Scripts/piholeLogFlush.sh /opt/pihole/piholeLogFlush.sh
-	$SUDO cp /etc/.pihole/advanced/Scripts/updateDashboard.sh /opt/pihole/updateDashboard.sh
-	$SUDO cp /etc/.pihole/automated\ install/uninstall.sh /opt/pihole/uninstall.sh
-	$SUDO cp /etc/.pihole/advanced/Scripts/setupLCD.sh /opt/pihole/setupLCD.sh
+	$SUDO cp $piholeFilesDir/gravity.sh /opt/pihole/gravity.sh
+	$SUDO cp $piholeFilesDir/advanced/Scripts/chronometer.sh /opt/pihole/chronometer.sh
+	$SUDO cp $piholeFilesDir/advanced/Scripts/whitelist.sh /opt/pihole/whitelist.sh
+	$SUDO cp $piholeFilesDir/advanced/Scripts/blacklist.sh /opt/pihole/blacklist.sh
+	$SUDO cp $piholeFilesDir/advanced/Scripts/piholeDebug.sh /opt/pihole/piholeDebug.sh
+	$SUDO cp $piholeFilesDir/advanced/Scripts/piholeLogFlush.sh /opt/pihole/piholeLogFlush.sh
+	$SUDO cp $piholeFilesDir/advanced/Scripts/updateDashboard.sh /opt/pihole/updateDashboard.sh
+	$SUDO cp $piholeFilesDir/automated\ install/uninstall.sh /opt/pihole/uninstall.sh
+	$SUDO cp $piholeFilesDir/advanced/Scripts/setupLCD.sh /opt/pihole/setupLCD.sh
 	$SUDO chmod 755 /opt/pihole/{gravity,chronometer,whitelist,blacklist,piholeLogFlush,updateDashboard,uninstall,setupLCD}.sh
-	$SUDO cp /etc/.pihole/pihole /usr/local/bin/pihole
+	$SUDO cp $piholeFilesDir/pihole /usr/local/bin/pihole
 	$SUDO chmod 755 /usr/local/bin/pihole
-	$SUDO cp /etc/.pihole/advanced/bash-completion/pihole /etc/bash_completion.d/pihole
+	$SUDO cp $piholeFilesDir/advanced/bash-completion/pihole /etc/bash_completion.d/pihole
 	. /etc/bash_completion.d/pihole
-
+$piholeFilesDir
 	#Tidy up /usr/local/bin directory if installing over previous install.
 	oldFiles=( gravity chronometer whitelist blacklist piholeLogFlush updateDashboard uninstall setupLCD piholeDebug)
 	for i in "${oldFiles[@]}"; do
-		if [ -f "/usr/local/bin/$i.sh" ]; then
+		if [[ -f "/usr/local/bin/$i.sh" ]]; then
 			$SUDO rm /usr/local/bin/"$i".sh
 		fi
 	done
@@ -542,12 +542,12 @@ installConfigs() {
 	$SUDO echo ":::"
 	$SUDO echo "::: Installing configs..."
 	versionCheckDNSmasq
-	if [ ! -d "$lighttpdDir" ]; then
+	if [[ ! -d "$lighttpdDir" ]]; then
 		$SUDO mkdir $lighttpdDir
 		$SUDO chown "$USER":root $lighttpdDir
 		$SUDO mv $lighttpdDir/lighttpd.conf $lighttpdConf.orig
 	fi
-	$SUDO cp /etc/.pihole/advanced/lighttpd.conf $lighttpdConf
+	$SUDO cp $piholeFilesDir/advanced/lighttpd.conf $lighttpdConf
 }
 
 stopServices() {
@@ -684,13 +684,13 @@ installPiholeWeb() {
 		else
 			printf "\n:::\tNo default index.lighttpd.html file found... not backing up"
 		fi
-		$SUDO cp /etc/.pihole/advanced/index.* /var/www/html/pihole/.
+		$SUDO cp $piholeFilesDir/advanced/index.* /var/www/html/pihole/.
 		$SUDO echo " done!"
 	fi
 	# Install Sudoer file
 	echo -n "::: Installing sudoer file..."
 	$SUDO mkdir -p /etc/sudoers.d/
-	$SUDO cp /etc/.pihole/advanced/pihole.sudo /etc/sudoers.d/pihole
+	$SUDO cp $piholeFilesDir/advanced/pihole.sudo /etc/sudoers.d/pihole
 	$SUDO chmod 0440 /etc/sudoers.d/pihole
 	echo " done!"
 }
@@ -699,7 +699,7 @@ installCron() {
 	# Install the cron job
 	$SUDO echo ":::"
 	$SUDO echo -n "::: Installing latest Cron script..."
-	$SUDO cp /etc/.pihole/advanced/pihole.cron /etc/cron.d/pihole
+	$SUDO cp $piholeFilesDir/advanced/pihole.cron /etc/cron.d/pihole
 	$SUDO echo " done!"
 }
 
