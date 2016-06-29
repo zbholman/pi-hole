@@ -34,6 +34,7 @@ ipv6File=/etc/pihole/.useIPv6
 dnsmasqConfDir=/etc
 dnsmasqDdir=/etc/dnsmasq.d
 scriptDir=/opt/pihole
+binDir=/usr/local/bin
 
 # If the kernel is Darwin, assume the user wants to install this on macOS.
 if [[ "$macOScheck" = "Darwin" ]];then
@@ -51,6 +52,7 @@ if [[ "$macOScheck" = "Darwin" ]];then
 			piholeFilesDir="$(brew --prefix dnsmasq)$piholeFilesDir"
 			dnsmasqDir="$(brew --prefix dnsmasq)/etc"
 			dnsmasqConf="$(brew --prefix dnsmasq)/etc/dnsmasq.conf"
+			binDir="$(brew --prefix dnsmasq)/bin"
 			# whiptail is not available via Homebrew so use dialog instead
 			dialogApp="dialog"
 			brew install $dialogApp
@@ -522,16 +524,16 @@ installScripts() {
 	$SUDO cp $piholeFilesDir/automated\ install/uninstall.sh $scriptDir/uninstall.sh
 	$SUDO cp $piholeFilesDir/advanced/Scripts/setupLCD.sh $scriptDir/setupLCD.sh
 	$SUDO chmod 755 $scriptDir/{gravity,chronometer,whitelist,blacklist,piholeLogFlush,updateDashboard,uninstall,setupLCD}.sh
-	$SUDO cp $piholeFilesDir/pihole /usr/local/bin/pihole
-	$SUDO chmod 755 /usr/local/bin/pihole
+	$SUDO cp $piholeFilesDir/pihole $binDir/pihole
+	$SUDO chmod 755 $binDir/pihole
 	$SUDO cp $piholeFilesDir/advanced/bash-completion/pihole /etc/bash_completion.d/pihole
 	. /etc/bash_completion.d/pihole
 $piholeFilesDir
 	#Tidy up /usr/local/bin directory if installing over previous install.
 	oldFiles=( gravity chronometer whitelist blacklist piholeLogFlush updateDashboard uninstall setupLCD piholeDebug)
 	for i in "${oldFiles[@]}"; do
-		if [[ -f "/usr/local/bin/$i.sh" ]]; then
-			$SUDO rm /usr/local/bin/"$i".sh
+		if [[ -f "$binDir/$i.sh" ]]; then
+			$SUDO rm $binDir/"$i".sh
 		fi
 	done
 
