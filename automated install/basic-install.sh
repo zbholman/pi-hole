@@ -623,6 +623,12 @@ checkForDependencies() {
 macOSstuff() {
 	brew services start lighttpd
 
+	# Configure dnsmasq: https://gist.github.com/ogrrd/5831371
+	mkdir -pv $(brew --prefix)/etc/
+	$SUDO cp -v $(brew --prefix dnsmasq)/homebrew.mxcl.dnsmasq.plist /Library/LaunchDaemons
+	$SUDO launchctl load -w /Library/LaunchDaemons/homebrew.mxcl.dnsmasq.plist
+	$SUDO mkdir -v /etc/resolver
+	$SUDO bash -c 'echo "nameserver 127.0.0.1" > /etc/resolver/dev'
 }
 
 getGitFiles() {
