@@ -33,6 +33,7 @@ dhcpcdFile=/etc/dhcpcd.conf
 ipv6File=/etc/pihole/.useIPv6
 dnsmasqConfDir=/etc
 dnsmasqDdir=/etc/dnsmasq.d
+scriptDir=/opt/pihole
 
 # If the kernel is Darwin, assume the user wants to install this on macOS.
 if [[ "$macOScheck" = "Darwin" ]];then
@@ -505,22 +506,22 @@ versionCheckDNSmasq(){
 installScripts() {
 	# Install the scripts from /etc/.pihole to their various locations
 	$SUDO echo ":::"
-	$SUDO echo -n "::: Installing scripts to /opt/pihole..."
-	if [[ ! -d /opt/pihole ]]; then
-		$SUDO mkdir /opt/pihole
-		$SUDO chown "$USER":root /opt/pihole
-		$SUDO chmod u+srwx /opt/pihole
+	$SUDO echo -n "::: Installing scripts to $scriptDir..."
+	if [[ ! -d $scriptDir ]]; then
+		$SUDO mkdir $scriptDir
+		$SUDO chown "$USER":root $scriptDir
+		$SUDO chmod u+srwx $scriptDir
 	fi
-	$SUDO cp $piholeFilesDir/gravity.sh /opt/pihole/gravity.sh
-	$SUDO cp $piholeFilesDir/advanced/Scripts/chronometer.sh /opt/pihole/chronometer.sh
-	$SUDO cp $piholeFilesDir/advanced/Scripts/whitelist.sh /opt/pihole/whitelist.sh
-	$SUDO cp $piholeFilesDir/advanced/Scripts/blacklist.sh /opt/pihole/blacklist.sh
-	$SUDO cp $piholeFilesDir/advanced/Scripts/piholeDebug.sh /opt/pihole/piholeDebug.sh
-	$SUDO cp $piholeFilesDir/advanced/Scripts/piholeLogFlush.sh /opt/pihole/piholeLogFlush.sh
-	$SUDO cp $piholeFilesDir/advanced/Scripts/updateDashboard.sh /opt/pihole/updateDashboard.sh
-	$SUDO cp $piholeFilesDir/automated\ install/uninstall.sh /opt/pihole/uninstall.sh
-	$SUDO cp $piholeFilesDir/advanced/Scripts/setupLCD.sh /opt/pihole/setupLCD.sh
-	$SUDO chmod 755 /opt/pihole/{gravity,chronometer,whitelist,blacklist,piholeLogFlush,updateDashboard,uninstall,setupLCD}.sh
+	$SUDO cp $piholeFilesDir/gravity.sh $scriptDir/gravity.sh
+	$SUDO cp $piholeFilesDir/advanced/Scripts/chronometer.sh $scriptDir/chronometer.sh
+	$SUDO cp $piholeFilesDir/advanced/Scripts/whitelist.sh $scriptDir/whitelist.sh
+	$SUDO cp $piholeFilesDir/advanced/Scripts/blacklist.sh $scriptDir/blacklist.sh
+	$SUDO cp $piholeFilesDir/advanced/Scripts/piholeDebug.sh $scriptDir/piholeDebug.sh
+	$SUDO cp $piholeFilesDir/advanced/Scripts/piholeLogFlush.sh $scriptDir/piholeLogFlush.sh
+	$SUDO cp $piholeFilesDir/advanced/Scripts/updateDashboard.sh $scriptDir/updateDashboard.sh
+	$SUDO cp $piholeFilesDir/automated\ install/uninstall.sh $scriptDir/uninstall.sh
+	$SUDO cp $piholeFilesDir/advanced/Scripts/setupLCD.sh $scriptDir/setupLCD.sh
+	$SUDO chmod 755 $scriptDir/{gravity,chronometer,whitelist,blacklist,piholeLogFlush,updateDashboard,uninstall,setupLCD}.sh
 	$SUDO cp $piholeFilesDir/pihole /usr/local/bin/pihole
 	$SUDO chmod 755 /usr/local/bin/pihole
 	$SUDO cp $piholeFilesDir/advanced/bash-completion/pihole /etc/bash_completion.d/pihole
@@ -712,7 +713,7 @@ runGravity() {
 		$SUDO rm /etc/pihole/list.*
 	fi
 	echo "::: Running gravity.sh"
-	$SUDO /opt/pihole/gravity.sh
+	$SUDO $scriptDir/gravity.sh
 }
 
 setUser(){
