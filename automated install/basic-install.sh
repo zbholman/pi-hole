@@ -36,6 +36,8 @@ dnsmasqConfDir=/etc
 dnsmasqDdir=/etc/dnsmasq.d
 scriptDir=/opt/pihole
 binDir=/usr/local/bin
+logDir=/var/log
+piholeLog=$logDir/pihole.log
 
 # If the kernel is Darwin, assume the user wants to install this on macOS.
 if [[ "$macOScheck" = "Darwin" ]];then
@@ -46,14 +48,16 @@ if [[ "$macOScheck" = "Darwin" ]];then
 		brewCheck=$(brew doctor)
 		if [[ "$brewCheck" = "Your system is ready to brew." ]];then
 			# Set some variables specific to macOS
-			lighttpdDir=$(brew --prefix dnsmasq)/etc/lighttpd
+			lighttpdDir=$(brew --prefix)/etc/lighttpd
 			lighttpdConf="$lighttpdDir"/lighttpd.conf
-			webInterfaceDir="$(brew --prefix dnsmasq)$webServerRoot/admin"
+			webServerRoot="$(brew --prefix)/var/www/html"
+			webInterfaceDir="$webServerRoot/admin"
 			piholeDir=$webInterfaceDir/pihole
-			piholeFilesDir="$(brew --prefix dnsmasq)$piholeFilesDir"
-			dnsmasqDir="$(brew --prefix dnsmasq)/etc"
-			dnsmasqConf="$(brew --prefix dnsmasq)/etc/dnsmasq.conf"
-			binDir="$(brew --prefix dnsmasq)/bin"
+			piholeFilesDir="$(brew --prefix)$piholeFilesDir"
+			dnsmasqDir="$(brew --prefix)/etc"
+			dnsmasqConf="$(brew --prefix)/etc/dnsmasq.conf"
+			binDir="$(brew --prefix)/bin"
+			logDir="$(brew --prefix)/var/log"
 			# whiptail is not available via Homebrew so use dialog instead
 			dialogApp="dialog"
 			brew install $dialogApp
@@ -683,10 +687,10 @@ CreateLogFile() {
 	# Create logfiles if necessary
 	echo ":::"
 	$SUDO  echo -n "::: Creating log file and changing owner to dnsmasq..."
-	if [[ ! -f /var/log/pihole.log ]]; then
-		$SUDO touch /var/log/pihole.log
-		$SUDO chmod 644 /var/log/pihole.log
-		$SUDO chown dnsmasq:root /var/log/pihole.log
+	if [[ ! -f $piholeLog ]]; then
+		$SUDO touch $piholeLog
+		$SUDO chmod 644 $piholeLog
+		$SUDO chown dnsmasq:root $piholeLog
 		$SUDO echo " done!"
 	else
 		$SUDO  echo " already exists!"
