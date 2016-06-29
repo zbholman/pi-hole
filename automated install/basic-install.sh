@@ -653,7 +653,7 @@ getGitFiles() {
 is_repo() {
 	# If the directory does not have a .git folder it is not a repo
 	echo -n ":::    Checking $1 is a repo..."
-		if [ -d "$1/.git" ]; then
+		if [[ -d "$1/.git" ]]; then
 		echo " OK!"
 		return 1
 	fi
@@ -682,7 +682,7 @@ CreateLogFile() {
 	# Create logfiles if necessary
 	echo ":::"
 	$SUDO  echo -n "::: Creating log file and changing owner to dnsmasq..."
-	if [ ! -f /var/log/pihole.log ]; then
+	if [[ ! -f /var/log/pihole.log ]]; then
 		$SUDO touch /var/log/pihole.log
 		$SUDO chmod 644 /var/log/pihole.log
 		$SUDO chown dnsmasq:root /var/log/pihole.log
@@ -696,11 +696,11 @@ installPiholeWeb() {
 	# Install the web interface
 	$SUDO echo ":::"
 	$SUDO echo -n "::: Installing pihole custom index page..."
-	if [ -d "/var/www/html/pihole" ]; then
+	if [[ -d "/var/www/html/pihole" ]]; then
 		$SUDO echo " Existing page detected, not overwriting"
 	else
 		$SUDO mkdir /var/www/html/pihole
-		if [ -f /var/www/html/index.lighttpd.html ]; then
+		if [[ -f /var/www/html/index.lighttpd.html ]]; then
 			$SUDO mv /var/www/html/index.lighttpd.html /var/www/html/index.lighttpd.orig
 		else
 			printf "\n:::\tNo default index.lighttpd.html file found... not backing up"
