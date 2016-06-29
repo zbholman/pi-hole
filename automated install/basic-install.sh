@@ -27,8 +27,9 @@ lighttpdDir=/etc/lighttpd
 lighttpdConf="$lighttpdDir"/lighttpd.conf
 webInterfaceGitUrl="https://github.com/pi-hole/AdminLTE.git"
 piholeGitUrl="https://github.com/pi-hole/pi-hole.git"
-webInterfaceDir="/var/www/html/admin"
-piholeFilesDir="/etc/.pihole"
+webServerRoot=/var/www/html
+webInterfaceDir=/var/www/html/admin
+piholeFilesDir=/etc/.pihole
 dhcpcdFile=/etc/dhcpcd.conf
 ipv6File=/etc/pihole/.useIPv6
 dnsmasqConfDir=/etc
@@ -47,7 +48,7 @@ if [[ "$macOScheck" = "Darwin" ]];then
 			# Set some variables specific to macOS
 			lighttpdDir=$(brew --prefix dnsmasq)/etc/lighttpd
 			lighttpdConf="$lighttpdDir"/lighttpd.conf
-			webInterfaceDir="$(brew --prefix dnsmasq)/var/www/html/admin"
+			webInterfaceDir="$(brew --prefix dnsmasq)$webServerRoot/admin"
 			piholeDir=$webInterfaceDir/pihole
 			piholeFilesDir="$(brew --prefix dnsmasq)$piholeFilesDir"
 			dnsmasqDir="$(brew --prefix dnsmasq)/etc"
@@ -696,16 +697,16 @@ installPiholeWeb() {
 	# Install the web interface
 	$SUDO echo ":::"
 	$SUDO echo -n "::: Installing pihole custom index page..."
-	if [[ -d "/var/www/html/pihole" ]]; then
+	if [[ -d "$webServerRoot/pihole" ]]; then
 		$SUDO echo " Existing page detected, not overwriting"
 	else
-		$SUDO mkdir /var/www/html/pihole
-		if [[ -f /var/www/html/index.lighttpd.html ]]; then
-			$SUDO mv /var/www/html/index.lighttpd.html /var/www/html/index.lighttpd.orig
+		$SUDO mkdir $webServerRoot/pihole
+		if [[ -f $webServerRoot/index.lighttpd.html ]]; then
+			$SUDO mv $webServerRoot/index.lighttpd.html $webServerRoot/index.lighttpd.orig
 		else
 			printf "\n:::\tNo default index.lighttpd.html file found... not backing up"
 		fi
-		$SUDO cp $piholeFilesDir/advanced/index.* /var/www/html/pihole/.
+		$SUDO cp $piholeFilesDir/advanced/index.* $webServerRoot/pihole/.
 		$SUDO echo " done!"
 	fi
 	# Install Sudoer file
@@ -753,11 +754,11 @@ installPihole() {
 	stopServices
 	setUser
 	$SUDO mkdir -p /etc/pihole/
-	if [ ! -d "/var/www/html" ]; then
-		$SUDO mkdir -p /var/www/html
+	if [ ! -d "$webServerRoot" ]; then
+		$SUDO mkdir -p $webServerRoot
 	fi
-	$SUDO chown www-data:www-data /var/www/html
-	$SUDO chmod 775 /var/www/html
+	$SUDO chown www-data:www-data $webServerRoot
+	$SUDO chmod 775 $webServerRoot
 	$SUDO usermod -a -G www-data pihole
 	$SUDO lighty-enable-mod fastcgi fastcgi-php > /dev/null
 
