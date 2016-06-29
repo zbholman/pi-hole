@@ -30,6 +30,9 @@ piholeGitUrl="https://github.com/pi-hole/pi-hole.git"
 webInterfaceDir="/var/www/html/admin"
 piholeFilesDir="/etc/.pihole"
 dhcpcdFile=/etc/dhcpcd.conf
+ipv6File=/etc/pihole/.useIPv6
+dnsmasqConfDir=/etc
+dnsmasqDdir=/etc/dnsmasq.d
 
 # If the kernel is Darwin, assume the user wants to install this on macOS.
 if [[ "$macOScheck" = "Darwin" ]];then
@@ -45,6 +48,7 @@ if [[ "$macOScheck" = "Darwin" ]];then
 			webInterfaceDir="$(brew --prefix dnsmasq)/var/www/html/admin"
 			piholeDir=$webInterfaceDir/pihole
 			piholeFilesDir="$(brew --prefix dnsmasq)/etc/.pihole"
+			dnsmasqDir="$(brew --prefix dnsmasq)/etc"
 			dnsmasqConf="$(brew --prefix dnsmasq)/etc/dnsmasq.conf"
 			# whiptail is not available via Homebrew so use dialog instead
 			dialogApp="dialog"
@@ -193,8 +197,8 @@ chooseInterface() {
 
 cleanupIPv6() {
 	# Removes IPv6 indicator file if we are not using IPv6
-	if [[ -f "/etc/pihole/.useIPv6" ]] && [[ ! "$useIPv6" ]]; then
-		rm /etc/pihole/.useIPv6
+	if [[ -f "$ipv6File" ]] && [[ ! "$useIPv6" ]]; then
+		rm $ipv6File
 	fi
 }
 
@@ -248,7 +252,7 @@ useIPv6dialog() {
 	piholeIPv6=$(ip -6 route get 2001:4860:4860::8888 | awk -F " " '{ for(i=1;i<=NF;i++) if ($i == "src") print $(i+1) }')
 	$dialogApp --backtitle "IPv6..." --title "IPv6 Supported" --msgbox "$piholeIPv6 will be used to block ads." $r $c
 
-	$SUDO touch /etc/pihole/.useIPv6
+	$SUDO touch $ipv6File
 }
 
 getStaticIPv4Settings() {
@@ -456,12 +460,12 @@ setDNS(){
 
 versionCheckDNSmasq(){
 	# Check if /etc/dnsmasq.conf is from pihole.  If so replace with an original and install new in .d directory
-	dnsFile1="/etc/dnsmasq.conf"
-	dnsFile2="/etc/dnsmasq.conf.orig"
-	dnsSearch="addn-hosts=/etc/pihole/gravity.list"
-	defaultFile="/etc/.pihole/advanced/dnsmasq.conf.original"
-	newFileToInstall="/etc/.pihole/advanced/01-pihole.conf"
-	newFileFinalLocation="/etc/dnsmasq.d/01-pihole.conf"
+	dnsFile1="$dnsmasqConfDir/dnsmasq.conf"
+	dnsFile2="$dnsmasqConfDir/dnsmasq.conf.orig"
+	dnsSearch="addn-hosts=$piholeDir/gravity.list"
+	defaultFile="$piholeFilesDir/advanced/dnsmasq.conf.original"
+	newFileToInstall="$piholeFilesDir/advanced/01-pihole.conf"
+	newFileFinalLocation="$dnsmasqDdir/01-pihole.conf"
 
 	if [[ -f $dnsFile1 ]]; then
 		echo -n ":::    Existing dnsmasq.conf found..."
