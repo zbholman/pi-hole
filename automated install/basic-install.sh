@@ -727,7 +727,7 @@ installPiholeWeb() {
 		$SUDO cp $piholeFilesDir/advanced/pihole.sudo $sudoersDir/pihole
 		$SUDO chmod 0440 $sudoersDir/pihole
 		echo " done!"
-fi
+	fi
 }
 
 installCron() {
