@@ -778,7 +778,11 @@ installPihole() {
 	$SUDO chown $webUser:$webUser $webServerRoot
 	$SUDO chmod 775 $webServerRoot
 	$SUDO usermod -a -G $webUser pihole
-	$SUDO lighty-enable-mod fastcgi fastcgi-php > /dev/null
+	if [[ "$macOScheck" = "Darwin" ]]; then
+		:
+	else
+		$SUDO lighty-enable-mod fastcgi fastcgi-php > /dev/null
+	fi
 
 	getGitFiles
 	installScripts
