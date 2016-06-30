@@ -40,6 +40,7 @@ binDir=/usr/local/bin
 logDir=/var/log
 piholeLog=$logDir/pihole.log
 sudoersDir=/etc/sudoers.d
+cronDir=/etc/cron.d
 webUser=www-data
 
 
@@ -62,7 +63,8 @@ if [[ "$macOScheck" = "Darwin" ]];then
 			dnsmasqConf="$(brew --prefix)/etc/dnsmasq.conf"
 			binDir="$(brew --prefix)/bin"
 			logDir="$(brew --prefix)/var/log"
-			sudoersDir=/var/log/tabs
+			sudoersDir=/etc/sudoers
+			cronDir=/var/log/tabs
 			webUser=_www
 			# whiptail is not available via Homebrew so use dialog instead
 			dialogApp="dialog"
@@ -737,7 +739,7 @@ installCron() {
 	# Install the cron job
 	$SUDO echo ":::"
 	$SUDO echo -n "::: Installing latest Cron script..."
-	$SUDO cp $piholeFilesDir/advanced/pihole.cron /etc/cron.d/pihole
+	$SUDO cp $piholeFilesDir/advanced/pihole.cron $cronDir/pihole
 	$SUDO echo " done!"
 }
 
