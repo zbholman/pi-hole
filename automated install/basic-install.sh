@@ -715,10 +715,15 @@ installPiholeWeb() {
 	fi
 	# Install Sudoer file
 	echo -n "::: Installing sudoer file..."
-	$SUDO mkdir -p /etc/sudoers.d/
-	$SUDO cp $piholeFilesDir/advanced/pihole.sudo /etc/sudoers.d/pihole
-	$SUDO chmod 0440 /etc/sudoers.d/pihole
-	echo " done!"
+	if [[ "$macOScheck" = "Darwin" ]]; then
+		# No sudoers.d on macOS so just append it to the suoders file
+		$SUDO bash -c 'echo "_www ALL=NOPASSWD: /usr/local/bin/pihole" >> /etc/sudoers'
+	else
+		$SUDO mkdir -p /etc/sudoers.d/
+		$SUDO cp $piholeFilesDir/advanced/pihole.sudo /etc/sudoers.d/pihole
+		$SUDO chmod 0440 /etc/sudoers.d/pihole
+		echo " done!"
+fi
 }
 
 installCron() {
