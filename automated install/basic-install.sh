@@ -23,6 +23,7 @@ macOScheck=$(uname -a | awk '{print $1}')
 tmpLog=/tmp/pihole-install.log
 instalLogLoc=/etc/pihole/install.log
 dialogApp="dialog"
+piholeDir=/etc/pihole
 lighttpdDir=/etc/lighttpd
 lighttpdConf="$lighttpdDir"/lighttpd.conf
 webInterfaceGitUrl="https://github.com/pi-hole/AdminLTE.git"
@@ -31,7 +32,7 @@ webServerRoot=/var/www/html
 webInterfaceDir=/var/www/html/admin
 piholeFilesDir=/etc/.pihole
 dhcpcdFile=/etc/dhcpcd.conf
-ipv6File=/etc/pihole/.useIPv6
+ipv6File=$piholeDir/.useIPv6
 dnsmasqConfDir=/etc
 dnsmasqDdir=/etc/dnsmasq.d
 scriptDir=/opt/pihole
@@ -277,7 +278,7 @@ getStaticIPv4Settings() {
 If you are worried, either manually set the address, or modify the DHCP reservation pool so it does not include the IP you want.
 It is also possible to use a DHCP reservation, but if you are going to do that, you might as well set a static address." $r $c
 		#piholeIP is saved to a permanent file so gravity.sh can use it when updating
-		$SUDO echo "${IPv4addr%/*}" > /etc/pihole/piholeIP
+		$SUDO echo "${IPv4addr%/*}" > $piholeDir/piholeIP
 		# Nothing else to do since the variables are already set above
 	else
 		# Otherwise, we need to ask the user to input their desired settings.
@@ -299,7 +300,7 @@ It is also possible to use a DHCP reservation, but if you are going to do that, 
 					Gateway:       $IPv4gw" $r $c)then
 					# If the settings are correct, then we need to set the piholeIP
 					# Saving it to a temporary file us to retrieve it later when we run the gravity.sh script. piholeIP is saved to a permanent file so gravity.sh can use it when updating
-					$SUDO echo "${IPv4addr%/*}" > /etc/pihole/piholeIP
+					$SUDO echo "${IPv4addr%/*}" > $piholeDir/piholeIP
 					$SUDO echo "$piholeInterface" > /tmp/piholeINT
 					# After that's done, the loop ends and we move on
 					ipSettingsCorrect=True
@@ -742,9 +743,9 @@ runGravity() {
 	# Rub gravity.sh to build blacklists
 	$SUDO echo ":::"
 	$SUDO echo "::: Preparing to run gravity.sh to refresh hosts..."
-	if ls /etc/pihole/list* 1> /dev/null 2>&1; then
+	if ls $piholeDir/list* 1> /dev/null 2>&1; then
 		echo "::: Cleaning up previous install (preserving whitelist/blacklist)"
-		$SUDO rm /etc/pihole/list.*
+		$SUDO rm $piholeDir/list.*
 	fi
 	echo "::: Running gravity.sh"
 	$SUDO $scriptDir/gravity.sh
@@ -766,7 +767,7 @@ installPihole() {
 	checkForDependencies # done
 	stopServices
 	setUser
-	$SUDO mkdir -p /etc/pihole/
+	$SUDO mkdir -p $piholeDir/
 	if [ ! -d "$webServerRoot" ]; then
 		$SUDO mkdir -p $webServerRoot
 	fi
@@ -799,7 +800,7 @@ View the web interface at http://pi.hole/admin or http://${IPv4addr%/*}/admin" $
 
 ######## SCRIPT ############
 # Start the installer
-$SUDO mkdir -p /etc/pihole/
+$SUDO mkdir -p $piholeDir/
 welcomeDialogs
 
 # Verify there is enough disk space for the install
@@ -836,5 +837,5 @@ echo ":::     $piholeIPv6"
 echo ":::"
 echo "::: If you set a new IP address, you should restart the Pi."
 echo ":::"
-echo "::: The install log is located at: /etc/pihole/install.log"
+echo "::: The install log is located at: $piholeDir/install.log"
 echo "::: View the web interface at http://pi.hole/admin or http://${IPv4addr%/*}/admin"
