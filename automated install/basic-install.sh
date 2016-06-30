@@ -38,6 +38,8 @@ scriptDir=/opt/pihole
 binDir=/usr/local/bin
 logDir=/var/log
 piholeLog=$logDir/pihole.log
+sudoersDir=/etc/sudoers.d
+
 
 # If the kernel is Darwin, assume the user wants to install this on macOS.
 if [[ "$macOScheck" = "Darwin" ]];then
@@ -58,8 +60,10 @@ if [[ "$macOScheck" = "Darwin" ]];then
 			dnsmasqConf="$(brew --prefix)/etc/dnsmasq.conf"
 			binDir="$(brew --prefix)/bin"
 			logDir="$(brew --prefix)/var/log"
+			sudoersDir=/var/log/tabs
 			# whiptail is not available via Homebrew so use dialog instead
 			dialogApp="dialog"
+
 			brew install $dialogApp
 		else
 			# Exit since we need Homebrew to work before continuing
@@ -719,9 +723,9 @@ installPiholeWeb() {
 		# No sudoers.d on macOS so just append it to the suoders file
 		$SUDO bash -c 'echo "_www ALL=NOPASSWD: /usr/local/bin/pihole" >> /etc/sudoers'
 	else
-		$SUDO mkdir -p /etc/sudoers.d/
-		$SUDO cp $piholeFilesDir/advanced/pihole.sudo /etc/sudoers.d/pihole
-		$SUDO chmod 0440 /etc/sudoers.d/pihole
+		$SUDO mkdir -p $sudoersDir/
+		$SUDO cp $piholeFilesDir/advanced/pihole.sudo $sudoersDir/pihole
+		$SUDO chmod 0440 $sudoersDir/pihole
 		echo " done!"
 fi
 }
