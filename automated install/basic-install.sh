@@ -47,6 +47,8 @@ webUser=www-data
 # If the kernel is Darwin, assume the user wants to install this on macOS.
 if [[ "$macOScheck" = "Darwin" ]];then
 	echo "macOS detected."
+	echo "Homebrew needs to be installed so Pi-hole can be installed.  Press enter to continue."
+	read
 	# Install Homebrew so dependencies can easily be installed via script
 	/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 	if [[ $? -eq 0 ]]; then
@@ -118,12 +120,17 @@ else
 	echo "::: sudo will be used for the install."
 	# Check if it is actually installed
 	# If it isn't, exit because the install cannot complete
-	if [[ $(dpkg-query -s sudo) ]];then
+	if [[ "$macOScheck" = "Darwin" ]]; then
 		export SUDO="sudo"
 	else
-		echo "::: sudo is needed for the Web interface to run pihole commands.  Please run this script as root and it will be automatically installed."
-		exit 1
+		if [[ $(dpkg-query -s sudo) ]];then
+			export SUDO="sudo"
+		else
+			echo "::: sudo is needed for the Web interface to run pihole commands.  Please run this script as root and it will be automatically installed."
+			exit 1
+		fi
 	fi
+
 fi
 
 
@@ -614,12 +621,12 @@ checkForDependencies() {
 		echo -n ":::    Checking for $i..."
 			if [[ "$macOScheck" = "Darwin" ]]; then
 				case "$i" in
-					dnsutils) echo "  no need for $i with macOS."
-					bc) echo "  no need for $i with macOS."
-					php5-common) echo "  no need for $i with macOS."
-					php5-cgi) echo "  no need for $i with macOS."
-					curl) echo "  no need for $i with macOS."
-					wget) echo "  no need for $i with macOS."
+					dnsutils) echo "  no need for $i with macOS.";;
+					bc) echo "  no need for $i with macOS.";;
+					php5-common) echo "  no need for $i with macOS.";;
+					php5-cgi) echo "  no need for $i with macOS.";;
+					curl) echo "  no need for $i with macOS.";;
+					wget) echo "  no need for $i with macOS.";;
 					*) brew install "$i";;
 				esac
 			else
