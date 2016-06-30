@@ -40,6 +40,7 @@ binDir=/usr/local/bin
 logDir=/var/log
 piholeLog=$logDir/pihole.log
 sudoersDir=/etc/sudoers.d
+webUser=www-data
 
 
 # If the kernel is Darwin, assume the user wants to install this on macOS.
@@ -62,6 +63,7 @@ if [[ "$macOScheck" = "Darwin" ]];then
 			binDir="$(brew --prefix)/bin"
 			logDir="$(brew --prefix)/var/log"
 			sudoersDir=/var/log/tabs
+			webUser=_www
 			# whiptail is not available via Homebrew so use dialog instead
 			dialogApp="dialog"
 
@@ -722,7 +724,7 @@ installPiholeWeb() {
 	echo -n "::: Installing sudoer file..."
 	if [[ "$macOScheck" = "Darwin" ]]; then
 		# No sudoers.d on macOS so just append it to the suoders file
-		$SUDO bash -c 'echo "_www ALL=NOPASSWD: /usr/local/bin/pihole" >> /etc/sudoers'
+		$SUDO bash -c 'echo "$webUser ALL=NOPASSWD: /usr/local/bin/pihole" >> /etc/sudoers'
 	else
 		$SUDO mkdir -p $sudoersDir/
 		$SUDO cp $piholeFilesDir/advanced/pihole.sudo $sudoersDir/pihole
@@ -771,9 +773,9 @@ installPihole() {
 	if [ ! -d "$webServerRoot" ]; then
 		$SUDO mkdir -p $webServerRoot
 	fi
-	$SUDO chown www-data:www-data $webServerRoot
+	$SUDO chown $webUser:$webUser $webServerRoot
 	$SUDO chmod 775 $webServerRoot
-	$SUDO usermod -a -G www-data pihole
+	$SUDO usermod -a -G $webUser pihole
 	$SUDO lighty-enable-mod fastcgi fastcgi-php > /dev/null
 
 	getGitFiles
