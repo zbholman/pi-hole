@@ -286,7 +286,7 @@ function gravity_prepare() {
 
     # Add blacklist wildcards to exception file
     if [ -f ${blacklistFileWild} ]; then
-        numberOf=$(wc -l < ${blacklistFile})
+        numberOf=$(wc -l < ${blacklistFileWild})
         echo -n "::: Adding $numberOf custom blacklist wildcard  domains..."
         ${SUDO} echo "#Blacklist wildcards:" >> ${exceptionFile}
         while read -r LINE
@@ -384,7 +384,8 @@ function gravity_reload() {
 
 	if [[ ${dnsmasqPid} ]]; then
 		# service already running - reload config
-		${SUDO} killall -s HUP dnsmasq
+		${SUDO} service dnsmasq reload
+		${SUDO} service dnsmasq restart
 	else
 		# service not running, start it up
 		${SUDO} service dnsmasq start
