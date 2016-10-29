@@ -28,6 +28,9 @@ WHITELISTMATCHES="/tmp/whitelistmatches.list"
 
 IPV6_READY=false
 
+AUTOMODE=false
+RUNFOR=60
+
 # Header info and introduction
 cat << EOM
 ::: Beginning Pi-hole debug at $(date)!
@@ -41,6 +44,10 @@ cat << EOM
 :::
 ::: Please read and note any issues, and follow any directions advised during this process.
 EOM
+
+if [[ ${1} -eq "-a" ]]; then
+  AUTOMODE=true
+fi
 
 # Ensure the file exists, create if not, clear if exists.
 truncate --size=0 "${DEBUG_LOG}"
@@ -317,12 +324,26 @@ debugLighttpd() {
 }
 
 tardis_loop() {
-  local tardis=$(($SECONDS+60))
+  local tardis=$(($SECONDS+$RUNFOR))
 
   		while [ $SECONDS -lt $tardis ]; do
       :
       done
 }
+
+tricorder_upload() {
+  local token
+  token=$(cat /var/log/pihole_debug.log | nc tricorder.pi-hole.net 9999)
+
+  # Check if tricorder.pi-hole.net is reachable and provide token.
+	if [ -n "${token}" ]; then
+		echo "::: Your debug token is : ${token}"
+		echo "::: Please contact the Pi-hole team with your token to being assistance."
+		echo "::: Thank you."
+	fi
+		echo "::: Debug log can be found at : /var/log/pihole_debug.log"
+}
+
 ### END FUNCTIONS ###
 
 # Gather version of required packages / repositories
@@ -376,23 +397,20 @@ finalWork() {
   local tricorder
 	echo "::: Finshed debugging!"
 	echo "::: The debug log can be uploaded to tricorder.pi-hole.net for sharing with developers only."
-	read -r -p "::: Would you like to upload the log? [y/N] " response
-	case ${response} in
-		[yY][eE][sS]|[yY])
-			tricorder=$(cat /var/log/pihole_debug.log | nc tricorder.pi-hole.net 9999)
-			;;
-		*)
-			echo "::: Log will NOT be uploaded to tricorder."
-			;;
-	esac
-
-	# Check if tricorder.pi-hole.net is reachable and provide token.
-	if [ -n "${tricorder}" ]; then
-		echo "::: Your debug token is : ${tricorder}"
-		echo "::: Please contact the Pi-hole team with your token to being assistance."
-		echo "::: Thank you."
+	if [[ "${AUTOMODE}" == "false" ]]; then
+	  read -r -p "::: Would you like to upload the log? [y/N] " response
+	  case ${response} in
+		  [yY][eE][sS]|[yY])
+			  tricorder=true
+			  ;;
+		  *)
+			  echo "::: Log will NOT be uploaded to tricorder."
+			  ;;
+	  esac
 	fi
-		echo "::: Debug log can be found at : /var/log/pihole_debug.log"
+  if [[ "${tricorder}" == "true" || "${AUTOMODE}" == "true" ]]; then
+    tricorder_upload
+  fi
 }
 
 trap finalWork EXIT
