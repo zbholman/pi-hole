@@ -316,6 +316,13 @@ debugLighttpd() {
   echo ":::"
 }
 
+tardis_loop() {
+  local tardis=$(($SECONDS+60))
+
+  		while [ $SECONDS -lt $tardis ]; do
+      :
+      done
+}
 ### END FUNCTIONS ###
 
 # Gather version of required packages / repositories
@@ -356,10 +363,8 @@ dumpPiHoleLog() {
 	echo -e "::: Try loading a site that you are having trouble with now from a client web browser.. \n:::\t(Press CTRL+C to finish logging.)"
 	header_write "pihole.log"
 	if [ -e "${PIHOLELOG}" ]; then
-		while true; do
-			tail -f "${PIHOLELOG}" >> ${DEBUG_LOG}
-			log_write ""
-		done
+	  tardis_loop &
+	  tail -f --pid=$! "${PIHOLELOG}" >> ${DEBUG_LOG}
 	else
 		log_write "No pihole.log file found!"
 		printf ":::\tNo pihole.log file found!\n"
