@@ -333,7 +333,7 @@ tardis_loop() {
 
 tricorder_upload() {
   local token
-  token=$(cat /var/log/pihole_debug.log | nc tricorder.pi-hole.net 9999)
+  token=$(nc tricorder.pi-hole.net 9999 < /var/log/pihole_debug.log)
 
   # Check if tricorder.pi-hole.net is reachable and provide token.
 	if [ -n "${token}" ]; then
