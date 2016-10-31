@@ -698,9 +698,11 @@ notify_package_updates_available() {
 
 install_dependent_packages() {
 	# Install packages passed in via argument array
-	# No spinner - conflicts with set -e
 	declare -a argArray1=("${!1}")
 
+	# Cache buster!
+	${UPDATE_PKG_CACHE} -qq -y &&
+	# No spinner - conflicts with set -e
 	for i in "${argArray1[@]}"; do
 		echo -n ":::    Checking for $i..."
 		package_check_install "${i}" &> /dev/null
